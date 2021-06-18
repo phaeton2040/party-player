@@ -1,0 +1,42 @@
+@import "../../../../colors";
+
+:host {
+  flex-basis: 8%;
+}
+
+.header {
+  height: 100%;
+  border-bottom: 1px solid $border-color;
+  display: flex;
+  align-items: center;
+  padding-left: 25px;
+  padding-right: 25px;
+
+  .controls {
+    flex: 1;
+    display: flex;
+  }
+
+  .settings {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .playback-controls {
+    display: flex;
+    justify-content: space-around;
+    flex-basis: 20%;
+    margin-right: 20px;
+  }
+
+  .playback-controls button {
+    &:hover {
+      color: crimson;
+    }
+  }
+
+  .volume-control {
+    margin-top: -2px;
+  }
+}

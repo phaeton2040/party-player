@@ -1,0 +1,100 @@
+@import "../../../../colors";
+
+:host {
+  display: flex;
+  flex-direction: column;
+}
+
+.search-wrapper {
+  height: 8vh;
+  justify-content: center;
+  align-items: flex-end;
+  display: flex;
+  padding: 0 20px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.songs-container {
+  padding: 0px 15px;
+  overflow: scroll;
+  height: 92vh;
+
+  &:hover {
+    .add-folder {
+      opacity: 1;
+      transition: opacity .2s ease-in;
+    }
+  }
+
+  .add-folder {
+    width: 100%;
+    opacity: 0;
+    transition: opacity .2s ease-in;
+  }
+
+  .name-and-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    &:hover .add-songs {
+      opacity: 1;
+      transition: opacity .2s ease-in;
+    }
+  }
+
+  .folder-name {
+    color: $folder-name-color;
+    font-size: 13px;
+  }
+
+  .add-songs {
+    color: $folder-name-color;
+    opacity: 0;
+    transition: opacity .2s ease-in;
+
+    mat-icon {
+      margin-bottom: 2px;
+    }
+  }
+
+  .songs-list {
+    padding-left: 10px;
+  }
+
+  .song-list-item {
+    padding: 4px 4px;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3px;
+    border: 1px solid transparent;
+
+    .author-and-name {
+      flex: 5;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .time {
+      flex: 1;
+      text-align: right;
+    }
+
+    &.active {
+      border: 1px solid $song-border-color;
+      transition: border .2s ease-in;
+    }
+
+    &:hover {
+      border: 1px solid $song-border-color;
+      transition: border .2s ease-in;
+      cursor: pointer;
+    }
+  }
+}
