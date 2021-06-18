@@ -1,30 +1,9 @@
 <div class="main-container">
-  <!-- SONGS -->
   <div class="left">
-    <div class="songs-container">
-
-    </div>
+    <rp-songs-list></rp-songs-list>
   </div>
-
-
   <div class="right">
-    <!-- HEADER WITH CONTROLS -->
-    <div class="header">
-
-      <div class="playback-controls">
-        <fa-icon [icon]="prevSongIcon"></fa-icon>
-        <fa-icon [icon]="playIcon"></fa-icon>
-        <fa-icon [icon]="nextSongIcon" style="margin-left: -5px"></fa-icon>
-      </div>
-
-      <div class="volume-control">
-        <mat-slider min="0" max="100"></mat-slider>
-      </div>
-    </div>
-
-    <!--  MAIN PANEL WITH SONG PLAYING  -->
-    <div class="main-panel">
-
-    </div>
+    <rp-header></rp-header>
+    <rp-main></rp-main>
   </div>
 </div>
