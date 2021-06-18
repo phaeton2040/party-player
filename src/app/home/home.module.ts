@@ -5,9 +5,12 @@ import { HomeRoutingModule } from './home-routing.module';
 
 import { HomeComponent } from './home.component';
 import { SharedModule } from '../shared/shared.module';
+import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
+import { MatSliderModule } from "@angular/material/slider";
 
 @NgModule({
-  declarations: [HomeComponent],
-  imports: [CommonModule, SharedModule, HomeRoutingModule]
+  declarations: [ HomeComponent ],
+  imports: [ CommonModule, SharedModule, HomeRoutingModule, FontAwesomeModule, MatSliderModule ]
 })
-export class HomeModule {}
+export class HomeModule {
+}

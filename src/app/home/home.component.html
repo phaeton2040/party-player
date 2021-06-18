@@ -1,7 +1,30 @@
-<div class="container">
-  <h1 class="title">
-    {{ 'PAGES.HOME.TITLE' | translate }}
-  </h1>
+<div class="main-container">
+  <!-- SONGS -->
+  <div class="left">
+    <div class="songs-container">
 
-  <a routerLink="/detail">{{ 'PAGES.HOME.GO_TO_DETAIL' | translate }}</a>
+    </div>
+  </div>
+
+
+  <div class="right">
+    <!-- HEADER WITH CONTROLS -->
+    <div class="header">
+
+      <div class="playback-controls">
+        <fa-icon [icon]="prevSongIcon"></fa-icon>
+        <fa-icon [icon]="playIcon"></fa-icon>
+        <fa-icon [icon]="nextSongIcon" style="margin-left: -5px"></fa-icon>
+      </div>
+
+      <div class="volume-control">
+        <mat-slider min="0" max="100"></mat-slider>
+      </div>
+    </div>
+
+    <!--  MAIN PANEL WITH SONG PLAYING  -->
+    <div class="main-panel">
+
+    </div>
+  </div>
 </div>
