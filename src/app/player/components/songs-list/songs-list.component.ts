@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { PlayerService } from "../../../core/services/player/player.service";
+import { Observable } from "rxjs";
+import { Playlist } from "../../../models/playlist.interface";
 
 @Component({
   selector: 'rp-songs-list',
@@ -7,9 +10,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class SongsListComponent implements OnInit {
 
+  // search query
   value = '';
 
-  constructor() { }
+  playlists$: Observable<Playlist[]>;
+
+  constructor(private plService: PlayerService) {
+    this.playlists$ = this.plService.playlists$;
+  }
 
   ngOnInit(): void {
   }

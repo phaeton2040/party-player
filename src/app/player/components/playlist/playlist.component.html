@@ -1,0 +1,16 @@
+<div class="folder">
+  <div class="name-and-controls">
+    <div class="folder-name">{{playlist.name}}</div>
+    <div class="buttons">
+      <button class="playlist-buttons" mat-icon-button (click)="removePlaylist(playlist.name)">
+        <mat-icon>remove</mat-icon>
+      </button>
+      <button class="playlist-buttons" mat-icon-button (click)="addFiles()">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+  </div>
+  <div class="songs-list">
+    <rp-song (selectSong)="playSong($event)" [song]="song" *ngFor="let song of playlist.songs"></rp-song>
+  </div>
+</div>

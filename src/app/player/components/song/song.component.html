@@ -1,0 +1,8 @@
+<div class="song-list-item" (click)="play()">
+  <div class="author-and-name" title="{{song.author}} - {{song.name}}">
+    <span class="song-author">{{song.author}}</span> - <span class="song-name">{{song.name}}</span>
+  </div>
+  <div class="time">
+    {{song.formattedDuration}}
+  </div>
+</div>

@@ -15,13 +15,20 @@ import { MatExpansionModule } from "@angular/material/expansion";
 import { HeaderComponent } from './components/header/header.component';
 import { SongsListComponent } from './components/songs-list/songs-list.component';
 import { MainComponent } from './components/main/main.component';
+import { AddPlaylistDialogComponent } from './components/header/add-playlist-dialog/add-playlist-dialog.component';
+import { MatDialogModule } from "@angular/material/dialog";
+import { SongComponent } from './components/song/song.component';
+import { PlaylistComponent } from './components/playlist/playlist.component';
 
 @NgModule({
   declarations: [
     PlayerComponent,
     HeaderComponent,
     SongsListComponent,
-    MainComponent
+    MainComponent,
+    AddPlaylistDialogComponent,
+    SongComponent,
+    PlaylistComponent
   ],
   imports: [
     CommonModule,
@@ -33,7 +40,8 @@ import { MainComponent } from './components/main/main.component';
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
-    MatExpansionModule
+    MatExpansionModule,
+    MatDialogModule
   ]
 })
 export class PlayerModule {

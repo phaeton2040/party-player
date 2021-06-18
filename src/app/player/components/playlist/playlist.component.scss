@@ -1,0 +1,32 @@
+@import "../../../../colors";
+
+
+.name-and-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  &:hover .playlist-buttons {
+    opacity: 1;
+    transition: opacity .2s ease-in;
+  }
+}
+
+.folder-name {
+  color: $folder-name-color;
+  font-size: 13px;
+}
+
+.playlist-buttons {
+  color: $folder-name-color;
+  opacity: 0;
+  transition: opacity .2s ease-in;
+
+  mat-icon {
+    margin-bottom: 2px;
+  }
+}
+
+.songs-list {
+  padding-left: 10px;
+}

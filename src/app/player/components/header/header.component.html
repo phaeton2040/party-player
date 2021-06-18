@@ -4,7 +4,10 @@
       <button mat-icon-button>
         <mat-icon>skip_previous</mat-icon>
       </button>
-      <button mat-icon-button>
+      <button mat-icon-button *ngIf="isPlaying$ | async" (click)="pause()">
+        <mat-icon>pause</mat-icon>
+      </button>
+      <button mat-icon-button *ngIf="(isPlaying$ | async) === false" (click)="play()">
         <mat-icon>play_arrow</mat-icon>
       </button>
       <button mat-icon-button>
@@ -17,7 +20,7 @@
   </div>
 
   <div class="settings">
-    <button class="add-folder" mat-button color="primary">
+    <button class="add-folder" mat-button color="primary" (click)="showAddPlayListDialog()">
       <mat-icon style="margin-top: -3px">add</mat-icon>
       Add playlist
     </button>
