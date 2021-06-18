@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { HomeRoutingModule } from './home-routing.module';
+import { PlayerRoutingModule } from './player-routing.module';
 
-import { HomeComponent } from './home.component';
+import { PlayerComponent } from './player.component';
 import { SharedModule } from '../shared/shared.module';
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { MatSliderModule } from "@angular/material/slider";
@@ -18,7 +18,7 @@ import { MainComponent } from './components/main/main.component';
 
 @NgModule({
   declarations: [
-    HomeComponent,
+    PlayerComponent,
     HeaderComponent,
     SongsListComponent,
     MainComponent
@@ -26,7 +26,7 @@ import { MainComponent } from './components/main/main.component';
   imports: [
     CommonModule,
     SharedModule,
-    HomeRoutingModule,
+    PlayerRoutingModule,
     FontAwesomeModule,
     MatSliderModule,
     MatButtonModule,
@@ -36,5 +36,5 @@ import { MainComponent } from './components/main/main.component';
     MatExpansionModule
   ]
 })
-export class HomeModule {
+export class PlayerModule {
 }
