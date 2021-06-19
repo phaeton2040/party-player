@@ -56,9 +56,8 @@ export class ElectronService {
   public readFile(path): Promise<Song> {
     return Promise.all([
       Promise.resolve(nodePath.basename(path)),
-      this.read(path),
       mm.parseFile(path, { duration: true, skipCovers: false })
-    ]).then(([name, file, stat]) => {
+    ]).then(([name, stat]) => {
       const songName = stat.common.title || name;
       const author = stat.common.artist || 'Unknown';
 
@@ -66,14 +65,13 @@ export class ElectronService {
         id: uuidv4(),
         name: songName,
         author,
-        buffer: file,
         path,
         duration: Math.ceil(stat.format.duration)
       });
     });
   }
 
-  private read(path: string) {
+  public read(path: string) {
     return new Promise((res, rej) => {
       this.fs.readFile(path, null, (err, file) => {
         if (err) {

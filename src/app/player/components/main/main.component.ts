@@ -1,4 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { Song } from '../../../models/song.model';
+import { PlayerService } from '../../../core/services/player/player.service';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'rp-main',
@@ -7,9 +11,31 @@ import { Component, OnInit } from '@angular/core';
 })
 export class MainComponent implements OnInit {
 
-  constructor() { }
+  currentSong: Observable<Song>;
+  position$ = of(0);
 
-  ngOnInit(): void {
+  constructor(private plService: PlayerService) {
+    this.currentSong = this.plService.currentSong$;
+    this.position$ = this.plService.position$;
   }
 
+  ngOnInit(): void {
+
+  }
+
+  public formatTime(position: number): string {
+    const minutes = Math.floor(position / 60).toString();
+    let seconds = (position % 60).toString();
+
+    if (seconds.toString().length === 1) {
+      seconds = `0${seconds}`;
+    }
+
+    return `${minutes}:${seconds}`;
+  }
+
+
+  public seek(e): void {
+    this.plService.seek(e.value);
+  }
 }

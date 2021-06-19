@@ -1,13 +1,13 @@
-<div class="main-panel">
+<div class="main-panel" *ngIf="(currentSong | async) !== null">
   <div class="name-and-author">
-    <span>Scara 2</span> - <span>Carla's Dreams</span>
+    <span>{{(currentSong | async).name}}</span> - <span>{{(currentSong | async).author}}</span>
   </div>
   <div class="progress">
-    <div class="current-position">2:12</div>
+    <div class="current-position">{{formatTime(position$ | async)}}</div>
     <div class="song-slider">
       <span>0</span>
-      <mat-slider min="0" max="179"></mat-slider>
-      <span>2:59</span>
+      <mat-slider min="0" [value]="position$ | async" [max]="(currentSong | async).duration" (change)="seek($event)"></mat-slider>
+      <span>{{(currentSong | async).formattedDuration}}</span>
     </div>
   </div>
 </div>

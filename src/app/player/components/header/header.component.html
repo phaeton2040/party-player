@@ -4,6 +4,9 @@
       <button mat-icon-button>
         <mat-icon>skip_previous</mat-icon>
       </button>
+      <button mat-icon-button (click)="stop()">
+        <mat-icon>stop</mat-icon>
+      </button>
       <button mat-icon-button *ngIf="isPlaying$ | async" (click)="pause()">
         <mat-icon>pause</mat-icon>
       </button>
@@ -15,7 +18,7 @@
       </button>
     </div>
     <div class="volume-control">
-      <mat-slider min="0" max="100"></mat-slider>
+      <mat-slider min="0" step="0.01" max="1" [value]="volume" (change)="setVolume($event)"></mat-slider>
     </div>
   </div>
 

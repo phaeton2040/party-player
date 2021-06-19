@@ -12,6 +12,7 @@ import { Observable } from 'rxjs';
 export class HeaderComponent implements OnInit {
 
   isPlaying$: Observable<boolean>;
+  volume = 0.5;
 
   constructor(private dialog: MatDialog,
               private plService: PlayerService) {
@@ -46,5 +47,13 @@ export class HeaderComponent implements OnInit {
 
   play() {
     this.plService.resumeSong();
+  }
+
+  stop() {
+    this.plService.stop();
+  }
+
+  setVolume(e) {
+    this.plService.setVolume(e.value);
   }
 }
