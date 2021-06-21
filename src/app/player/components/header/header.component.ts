@@ -4,6 +4,7 @@ import { AddPlaylistDialogComponent } from "./add-playlist-dialog/add-playlist-d
 import { PlayerService } from "../../../core/services/player/player.service";
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { PlaylistService } from '../../../core/services/playlist/playlist.service';
 
 @Component({
   selector: 'rp-header',
@@ -16,8 +17,9 @@ export class HeaderComponent implements OnInit {
   volume = 0.5;
 
   constructor(private dialog: MatDialog,
-              private plService: PlayerService) {
-    this.isPlaying$ = this.plService.isPlaying$;
+              private player: PlayerService,
+              private playlist: PlaylistService) {
+    this.isPlaying$ = this.player.isPlaying$;
     this.isPlaying$.subscribe(val => {
       console.log('is playing:', val);
     });
@@ -37,32 +39,32 @@ export class HeaderComponent implements OnInit {
         return;
       }
 
-      this.plService.addPlaylist({ name: result, songs: [] });
+      this.playlist.addPlaylist({ name: result, songs: [] });
     });
   }
 
   pause() {
-    this.plService.pauseSong();
+    this.player.pauseSong();
   }
 
   play() {
-    this.plService.isPaused$
+    this.player.isPaused$
       .pipe(
         take(1)
       ).subscribe(paused => {
         if (paused) {
-          this.plService.resumeSong();
+          this.player.resumeSong();
         } else {
-          this.plService.playCurrentOrFirst();
+          this.player.playCurrentOrFirst();
         }
       });
   }
 
   stop() {
-    this.plService.stop();
+    this.player.stop();
   }
 
   setVolume(e) {
-    this.plService.setVolume(e.value);
+    this.player.setVolume(e.value);
   }
 }

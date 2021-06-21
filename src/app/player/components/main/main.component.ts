@@ -14,9 +14,9 @@ export class MainComponent implements OnInit {
   currentSong: Observable<Song>;
   position$ = of(0);
 
-  constructor(private plService: PlayerService) {
-    this.currentSong = this.plService.currentSong$;
-    this.position$ = this.plService.position$;
+  constructor(private player: PlayerService) {
+    this.currentSong = this.player.currentSong$;
+    this.position$ = this.player.position$;
   }
 
   ngOnInit(): void {
@@ -36,6 +36,6 @@ export class MainComponent implements OnInit {
 
   public seek(e): void {
     console.log('Seek position:', e.value);
-    this.plService.seek(e.value);
+    this.player.seek(e.value);
   }
 }

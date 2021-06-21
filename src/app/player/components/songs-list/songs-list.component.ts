@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { PlayerService } from "../../../core/services/player/player.service";
 import { Observable } from "rxjs";
 import { Playlist } from "../../../models/playlist.interface";
+import { PlaylistService } from '../../../core/services/playlist/playlist.service';
 
 @Component({
   selector: 'rp-songs-list',
@@ -15,8 +15,8 @@ export class SongsListComponent implements OnInit {
 
   playlists$: Observable<Playlist[]>;
 
-  constructor(private plService: PlayerService) {
-    this.playlists$ = this.plService.playlists$;
+  constructor(private playlistSrv: PlaylistService) {
+    this.playlists$ = this.playlistSrv.playlists$;
   }
 
   ngOnInit(): void {

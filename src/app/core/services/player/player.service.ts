@@ -1,9 +1,9 @@
 import { Injectable } from "@angular/core";
-import { BehaviorSubject, interval, Observable, Subject } from "rxjs";
-import { Playlist } from "../../../models/playlist.interface";
+import { BehaviorSubject, interval, Observable } from "rxjs";
 import { ElectronService } from "../electron/electron.service";
 import { Song } from '../../../models/song.model';
-import { filter, map, switchMap } from 'rxjs/operators';
+import { filter, map, switchMap, take } from 'rxjs/operators';
+import { PlaylistService } from '../playlist/playlist.service';
 
 
 @Injectable({
@@ -16,7 +16,6 @@ export class PlayerService {
   private startTime = 0;
   private offset = 0;
 
-  private playlists: BehaviorSubject<Playlist[]> = new BehaviorSubject<Playlist[]>([]);
   private isPlaying: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   private isPaused: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   private currentSong: BehaviorSubject<Song> = new BehaviorSubject<Song>(null);
@@ -25,10 +24,6 @@ export class PlayerService {
   public audio: AudioBufferSourceNode;
 
   public volume = new BehaviorSubject(0.5);
-
-  public get playlists$(): Observable<Playlist[]> {
-    return this.playlists.asObservable();
-  }
 
   public get isPlaying$(): Observable<boolean> {
     return this.isPlaying.asObservable();
@@ -51,47 +46,29 @@ export class PlayerService {
       );
   }
 
-  constructor(private electron: ElectronService) {
+  constructor(private electron: ElectronService,
+              private playlist: PlaylistService) {
     this.context = new AudioContext();
     this.context.suspend();
   }
 
-  public addPlaylist(pl: Playlist): void {
-    const currPlaylists = this.playlists.value;
-
-    currPlaylists.push(pl);
-
-    this.playlists.next(currPlaylists);
-  }
-
-  public removePlaylist(name: string): void {
-    const currPlaylists = this.playlists.value;
-
-    this.playlists.next(currPlaylists.filter((pl) => pl.name !== name));
-  }
-
-  public async addSongs(playlistName: string): Promise<void> {
-    const currPlaylists = this.playlists.value;
-    const playlist = currPlaylists.find((pl) => pl.name === playlistName);
-    const songs = await this.electron.selectFiles();
-
-    playlist.songs = playlist.songs.concat(songs);
-
-    this.playlists.next(currPlaylists);
-  }
-
-  public findSongAndPlay(playlistName: string, index: number): Promise<void> {
+  public findSongAndPlay(playlistName: string, index: number): void {
     this.stop();
 
-    const currPlaylists = this.playlists.value;
-    const playlist = currPlaylists.find((pl) => pl.name === playlistName);
-    const song = playlist.songs[index];
+    this.playlist.playlists$
+      .pipe(
+        take(1)
+      ).subscribe((playlists) => {
+        const currPlaylists = playlists;
+        const playlist = currPlaylists.find((pl) => pl.name === playlistName);
+        const song = playlist.songs[index];
 
-    if (!song) {
-      return;
-    }
+        if (!song) {
+          return;
+        }
 
-    this.playSong(song);
+        this.playSong(song);
+      });
   }
 
   public async playSong(song: Song): Promise<void> {
@@ -125,16 +102,21 @@ export class PlayerService {
   }
 
   public playCurrentOrFirst(): void {
-    if (this.currentSong.value) {
-      this.playSong(this.currentSong.value);
-    } else {
-      const pl = this.playlists.value[0];
-      const song = pl ? pl.songs[0] : null;
+    this.playlist.playlists$
+      .pipe(
+        take(1)
+      ).subscribe(playlists => {
+        if (this.currentSong.value) {
+          this.playSong(this.currentSong.value);
+        } else {
+          const pl = playlists[0];
+          const song = pl ? pl.songs[0] : null;
 
-      if (song) {
-        this.playSong(song);
-      }
-    }
+          if (song) {
+            this.playSong(song);
+          }
+        }
+      });
   }
 
   public async pauseSong(): Promise<void> {
@@ -158,6 +140,7 @@ export class PlayerService {
     }
 
     this.isPlaying.next(false);
+    this.isPaused.next(false);
     this.audio.stop();
 
     if (erase) {

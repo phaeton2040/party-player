@@ -21,11 +21,11 @@ export class SongComponent implements OnInit {
 
   public isActive$: Observable<boolean>;
 
-  constructor(private plService: PlayerService) {
+  constructor(private player: PlayerService) {
   }
 
   ngOnInit(): void {
-    this.isActive$ = this.plService.currentSong$
+    this.isActive$ = this.player.currentSong$
       .pipe(
         filter(song => !!song),
         map((song) => {
