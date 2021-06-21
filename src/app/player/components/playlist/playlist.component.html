@@ -11,6 +11,6 @@
     </div>
   </div>
   <div class="songs-list">
-    <rp-song (selectSong)="playSong($event)" [song]="song" *ngFor="let song of playlist.songs"></rp-song>
+    <rp-song (selectSong)="playSong(i)" [song]="song" *ngFor="let song of playlist.songs; let i = index"></rp-song>
   </div>
 </div>

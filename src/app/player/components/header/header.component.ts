@@ -3,6 +3,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { AddPlaylistDialogComponent } from "./add-playlist-dialog/add-playlist-dialog.component";
 import { PlayerService } from "../../../core/services/player/player.service";
 import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'rp-header',
@@ -17,7 +18,6 @@ export class HeaderComponent implements OnInit {
   constructor(private dialog: MatDialog,
               private plService: PlayerService) {
     this.isPlaying$ = this.plService.isPlaying$;
-
     this.isPlaying$.subscribe(val => {
       console.log('is playing:', val);
     });
@@ -46,7 +46,16 @@ export class HeaderComponent implements OnInit {
   }
 
   play() {
-    this.plService.resumeSong();
+    this.plService.isPaused$
+      .pipe(
+        take(1)
+      ).subscribe(paused => {
+        if (paused) {
+          this.plService.resumeSong();
+        } else {
+          this.plService.playCurrentOrFirst();
+        }
+      });
   }
 
   stop() {

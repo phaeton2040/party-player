@@ -20,7 +20,6 @@ export class MainComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
   }
 
   public formatTime(position: number): string {
@@ -36,6 +35,7 @@ export class MainComponent implements OnInit {
 
 
   public seek(e): void {
+    console.log('Seek position:', e.value);
     this.plService.seek(e.value);
   }
 }

@@ -1,9 +1,9 @@
 import { Injectable } from "@angular/core";
-import { BehaviorSubject, interval, Observable } from "rxjs";
+import { BehaviorSubject, interval, Observable, Subject } from "rxjs";
 import { Playlist } from "../../../models/playlist.interface";
 import { ElectronService } from "../electron/electron.service";
 import { Song } from '../../../models/song.model';
-import { map, min } from 'rxjs/operators';
+import { filter, map, switchMap } from 'rxjs/operators';
 
 
 @Injectable({
@@ -18,6 +18,7 @@ export class PlayerService {
 
   private playlists: BehaviorSubject<Playlist[]> = new BehaviorSubject<Playlist[]>([]);
   private isPlaying: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  private isPaused: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   private currentSong: BehaviorSubject<Song> = new BehaviorSubject<Song>(null);
 
   public gainController: GainNode;
@@ -33,19 +34,26 @@ export class PlayerService {
     return this.isPlaying.asObservable();
   }
 
+  public get isPaused$(): Observable<boolean> {
+    return this.isPaused.asObservable();
+  }
+
   public get currentSong$(): Observable<Song> {
     return this.currentSong.asObservable();
   }
 
   public get position$(): Observable<number> {
-    return interval(1000)
+    return interval(30)
       .pipe(
-        map(() => Math.floor(this.context.currentTime + this.offset - this.startTime))
+        switchMap(() => this.isPlaying),
+        filter((isPlaying) => !!isPlaying),
+        map(() => Math.floor(this.context.currentTime - this.startTime))
       );
   }
 
   constructor(private electron: ElectronService) {
     this.context = new AudioContext();
+    this.context.suspend();
   }
 
   public addPlaylist(pl: Playlist): void {
@@ -72,27 +80,37 @@ export class PlayerService {
     this.playlists.next(currPlaylists);
   }
 
-  public findSongAndPlay(playlistName: string, id: string): Promise<void> {
+  public findSongAndPlay(playlistName: string, index: number): Promise<void> {
     this.stop();
 
     const currPlaylists = this.playlists.value;
     const playlist = currPlaylists.find((pl) => pl.name === playlistName);
-    const song = playlist.songs.find(s => s.id === id);
+    const song = playlist.songs[index];
 
     if (!song) {
       return;
     }
 
-    this.currentSong.next(song);
-    this.isPlaying.next(true);
-
     this.playSong(song);
   }
 
-  public async playSong(song: Song, offset?: number): Promise<void> {
+  public async playSong(song: Song): Promise<void> {
+    this.currentSong.next(song);
+    this.isPlaying.next(true);
+    this.isPaused.next(false);
+
+    await this.context.resume();
+
     try {
+      this.startTime = this.context.currentTime - this.offset;
+
       const songArrayBuffer = await this.electron.read(song.path);
       const audioBuffer = await this.context.decodeAudioData(songArrayBuffer as ArrayBuffer);
+
+      const currSong = this.currentSong.value;
+
+      currSong.duration = Math.round(audioBuffer.duration);
+      this.currentSong.next(currSong);
 
       this.audio = this.context.createBufferSource();
       this.audio.buffer = audioBuffer;
@@ -100,45 +118,53 @@ export class PlayerService {
       this.gainController.gain.setValueAtTime(this.volume.value, this.context.currentTime);
       this.audio.connect(this.gainController);
       this.gainController.connect(this.context.destination);
-
-      if (!offset) {
-        this.startTime = this.context.currentTime;
-      }
-
-      console.log('Start time:', this.startTime);
-      console.log('Current time:', this.context.currentTime);
-      console.log('Offset:', offset);
-      this.audio.start(this.context.currentTime, offset);
+      this.audio.start(this.context.currentTime, this.offset);
     } catch (e) {
-      console.log(e);
+      console.log('Error while trying to play:', e);
     }
   }
 
+  public playCurrentOrFirst(): void {
+    if (this.currentSong.value) {
+      this.playSong(this.currentSong.value);
+    } else {
+      const pl = this.playlists.value[0];
+      const song = pl ? pl.songs[0] : null;
 
-  public pauseSong(): void {
-    this.isPlaying.next(false);
-    this.audio.playbackRate.setValueAtTime(0, this.context.currentTime);
+      if (song) {
+        this.playSong(song);
+      }
+    }
   }
 
-  public resumeSong(): void {
+  public async pauseSong(): Promise<void> {
+    this.isPlaying.next(false);
+    this.isPaused.next(true);
+    this.audio.playbackRate.setValueAtTime(0, this.context.currentTime);
+
+    await this.context.suspend();
+  }
+
+  public async resumeSong(): Promise<void> {
     this.isPlaying.next(true);
+    this.isPaused.next(false);
+    await this.context.resume();
     this.audio.playbackRate.setValueAtTime(1, this.context.currentTime);
   }
 
-  public stop(erase = true): void {
+  public async stop(erase = true): Promise<void> {
     if (!this.audio) {
       return;
     }
 
     this.isPlaying.next(false);
+    this.audio.stop();
 
     if (erase) {
       this.startTime = this.context.currentTime;
       this.offset = 0;
-      this.currentSong.next(null);
+      await this.context.suspend();
     }
-
-    this.audio.stop();
   }
 
   public setVolume(volume: number): void {
@@ -149,9 +175,9 @@ export class PlayerService {
     }
   }
 
-  public seek(position: number): void {
-    this.stop(false);
+  public async seek(position: number): Promise<void> {
+    await this.stop(false);
     this.offset = position;
-    this.playSong(this.currentSong.value, position);
+    await this.playSong(this.currentSong.value);
   }
 }

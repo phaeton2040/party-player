@@ -26,7 +26,7 @@ export class PlaylistComponent implements OnInit {
     await this.plService.addSongs(this.playlist.name);
   }
 
-  playSong(songId: string) {
-    this.plService.findSongAndPlay(this.playlist.name, songId);
+  playSong(index: number) {
+    this.plService.findSongAndPlay(this.playlist.name, index);
   }
 }
