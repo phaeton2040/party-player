@@ -1,7 +1,7 @@
 <div class="header">
   <div class="controls">
     <div class="playback-controls">
-      <button mat-icon-button (click)="prev()">
+      <button mat-icon-button (click)="prev()" [disabled]="disabled$ | async">
         <mat-icon>skip_previous</mat-icon>
       </button>
       <button mat-icon-button (click)="stop()">
@@ -13,7 +13,7 @@
       <button mat-icon-button *ngIf="(isPlaying$ | async) === false" (click)="play()">
         <mat-icon>play_arrow</mat-icon>
       </button>
-      <button mat-icon-button (click)="next()">
+      <button mat-icon-button (click)="next()" [disabled]="disabled$ | async">
         <mat-icon>skip_next</mat-icon>
       </button>
     </div>

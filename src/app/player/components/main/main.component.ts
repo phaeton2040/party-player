@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, combineLatest } from 'rxjs';
 import { Song } from '../../../models/song.model';
 import { PlayerService } from '../../../core/services/player/player.service';
 import { map } from 'rxjs/operators';
@@ -28,7 +28,14 @@ export class MainComponent implements OnInit {
         this.position$ = this.player.position$;
       }
     });
-    this.disabled$ = this.player.isSeeking;
+    this.disabled$ = combineLatest([
+      this.player.isSeeking,
+      this.player.isStop
+    ]).pipe(
+      map(([seek, stop]) => {
+        return seek || stop;
+      })
+    );
   }
 
   public formatTime(position: number): string {

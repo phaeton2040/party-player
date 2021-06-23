@@ -15,6 +15,7 @@ export class HeaderComponent implements OnInit {
 
   isPlaying$: Observable<boolean>;
   volume = 0.5;
+  disabled$: Observable<boolean>;
 
   constructor(private dialog: MatDialog,
               private player: PlayerService,
@@ -23,6 +24,7 @@ export class HeaderComponent implements OnInit {
     this.isPlaying$.subscribe(val => {
       console.log('is playing:', val);
     });
+    this.disabled$ = this.player.isStop;
   }
 
   ngOnInit(): void {

@@ -194,13 +194,13 @@ export class PlayerService {
     await this.playSong(this.currentSong.value);
   }
 
-  public playNext(): void {
-    this.stop();
+  public async playNext(): Promise<void> {
+    await this.stop();
     this.findSongAndPlay(this.playlist.getNextSong(this.playerIndex.value));
   }
 
-  public playPrev(): void {
-    this.stop();
+  public async playPrev(): Promise<void> {
+    await this.stop();
     this.findSongAndPlay(this.playlist.getPrevSong(this.playerIndex.value));
   }
 }
