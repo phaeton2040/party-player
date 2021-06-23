@@ -13,6 +13,9 @@ export class PlaylistComponent implements OnInit {
   @Input()
   public playlist: Playlist;
 
+  @Input()
+  public index: number;
+
   constructor(private player: PlayerService,
               private playlistSrv: PlaylistService) { }
 
@@ -28,7 +31,7 @@ export class PlaylistComponent implements OnInit {
     await this.playlistSrv.addSongs(this.playlist.name);
   }
 
-  playSong(index: number) {
-    this.player.findSongAndPlay(this.playlist.name, index);
+  playSong(songIndex: number) {
+    this.player.findSongAndPlay({ playlistIndex: this.index, songIndex });
   }
 }

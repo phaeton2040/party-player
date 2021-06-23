@@ -16,10 +16,16 @@ export class MainComponent implements OnInit {
 
   constructor(private player: PlayerService) {
     this.currentSong = this.player.currentSong$;
-    this.position$ = this.player.position$;
   }
 
   ngOnInit(): void {
+    this.player.isPlaying$.subscribe(playing => {
+      if (!playing) {
+        this.position$ = of(0);
+      } else {
+        this.position$ = this.player.position$;
+      }
+    });
   }
 
   public formatTime(position: number): string {

@@ -60,11 +60,19 @@ export class HeaderComponent implements OnInit {
       });
   }
 
-  stop() {
+  stop(): void {
     this.player.stop();
   }
 
-  setVolume(e) {
+  setVolume(e): void {
     this.player.setVolume(e.value);
+  }
+
+  next(): void {
+    this.player.playNext();
+  }
+
+  prev(): void {
+    this.player.playPrev();
   }
 }

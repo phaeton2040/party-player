@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Playlist } from '../../../models/playlist.interface';
 import { ElectronService } from '../electron/electron.service';
+import { PlayerIndex } from '../player/player.service';
 
 @Injectable({
   providedIn: 'root'
@@ -39,6 +40,46 @@ export class PlaylistService {
     playlist.songs = playlist.songs.concat(songs);
 
     this.playlists.next(currPlaylists);
+  }
+
+  public getNextSong(playerIndex: PlayerIndex): PlayerIndex {
+    // TODO: randomize logic will go here
+    const pl = this.playlists.value[playerIndex.playlistIndex];
+    const { songIndex } = playerIndex;
+
+    if (!pl) {
+      return null;
+    }
+
+    if (pl.songs[songIndex + 1]) {
+      return { ...playerIndex, songIndex: songIndex + 1 };
+    } else {
+      if (this.playlists.value[playerIndex.playlistIndex + 1]) {
+        return { playlistIndex: playerIndex.playlistIndex + 1, songIndex: 0 };
+      } else {
+        return null;
+      }
+    }
+  }
+
+  public getPrevSong(playerIndex: PlayerIndex): PlayerIndex {
+    // TODO: randomize logic will go here
+    const pl = this.playlists.value[playerIndex.playlistIndex];
+    const { songIndex } = playerIndex;
+
+    if (!pl) {
+      return null;
+    }
+
+    if (pl.songs[songIndex - 1]) {
+      return { ...playerIndex, songIndex: songIndex - 1 };
+    } else {
+      if (this.playlists.value[playerIndex.playlistIndex - 1]) {
+        return { playlistIndex: playerIndex.playlistIndex - 1, songIndex: 0 };
+      } else {
+        return null;
+      }
+    }
   }
 
 }

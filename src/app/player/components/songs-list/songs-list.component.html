@@ -9,7 +9,7 @@
 </div>
 
 <div *ngIf="(playlists$ | async).length > 0" class="songs-container">
-  <rp-playlist [playlist]="pl" *ngFor="let pl of playlists$ | async"></rp-playlist>
+  <rp-playlist [playlist]="pl" [index]="i" *ngFor="let pl of playlists$ | async; let i = index;"></rp-playlist>
 </div>
 <div class="no-playlists" *ngIf="(playlists$ | async).length === 0">
   Please create playlists before adding songs

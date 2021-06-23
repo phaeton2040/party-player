@@ -5,6 +5,10 @@ import { Song } from '../../../models/song.model';
 import { filter, map, switchMap, take } from 'rxjs/operators';
 import { PlaylistService } from '../playlist/playlist.service';
 
+export interface PlayerIndex {
+  playlistIndex: number;
+  songIndex: number;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +23,10 @@ export class PlayerService {
   private isPlaying: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   private isPaused: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   private currentSong: BehaviorSubject<Song> = new BehaviorSubject<Song>(null);
+  private playerIndex: BehaviorSubject<PlayerIndex> = new BehaviorSubject<PlayerIndex>({
+    playlistIndex: 0,
+    songIndex: 0
+  });
 
   public gainController: GainNode;
   public audio: AudioBufferSourceNode;
@@ -52,16 +60,20 @@ export class PlayerService {
     this.context.suspend();
   }
 
-  public findSongAndPlay(playlistName: string, index: number): void {
+  public findSongAndPlay(playerIndex: PlayerIndex): void {
+    if (!playerIndex) {
+      return;
+    }
+
     this.stop();
+    this.playerIndex.next(playerIndex);
 
     this.playlist.playlists$
       .pipe(
         take(1)
       ).subscribe((playlists) => {
-        const currPlaylists = playlists;
-        const playlist = currPlaylists.find((pl) => pl.name === playlistName);
-        const song = playlist.songs[index];
+        const playlist = playlists[playerIndex.playlistIndex];
+        const song = playlist ? playlist.songs[playerIndex.songIndex] : null;
 
         if (!song) {
           return;
@@ -96,6 +108,17 @@ export class PlayerService {
       this.audio.connect(this.gainController);
       this.gainController.connect(this.context.destination);
       this.audio.start(this.context.currentTime, this.offset);
+
+      this.audio.onended = () => {
+        if (this.isSeeking || this.isStop) {
+          return;
+        }
+        this.stop();
+        this.findSongAndPlay(this.playlist.getNextSong(this.playerIndex.value));
+      };
+
+      this.isSeeking = false;
+      this.isStop = false;
     } catch (e) {
       console.log('Error while trying to play:', e);
     }
@@ -134,6 +157,8 @@ export class PlayerService {
     this.audio.playbackRate.setValueAtTime(1, this.context.currentTime);
   }
 
+  private isStop = false;
+
   public async stop(erase = true): Promise<void> {
     if (!this.audio) {
       return;
@@ -141,6 +166,7 @@ export class PlayerService {
 
     this.isPlaying.next(false);
     this.isPaused.next(false);
+    this.isStop = true;
     this.audio.stop();
 
     if (erase) {
@@ -158,9 +184,23 @@ export class PlayerService {
     }
   }
 
+  private isSeeking = false;
+
   public async seek(position: number): Promise<void> {
-    await this.stop(false);
     this.offset = position;
+    this.isSeeking = true;
+
+    await this.stop(false);
     await this.playSong(this.currentSong.value);
+  }
+
+  public playNext(): void {
+    this.stop();
+    this.findSongAndPlay(this.playlist.getNextSong(this.playerIndex.value));
+  }
+
+  public playPrev(): void {
+    this.stop();
+    this.findSongAndPlay(this.playlist.getPrevSong(this.playerIndex.value));
   }
 }
