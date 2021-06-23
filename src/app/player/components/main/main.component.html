@@ -6,7 +6,7 @@
     <div class="current-position">{{formatTime(position$ | async)}}</div>
     <div class="song-slider">
       <span>0</span>
-      <mat-slider min="0" [value]="position$ | async" [max]="(currentSong | async).duration" (change)="seek($event)"></mat-slider>
+      <mat-slider min="0" [disabled]="disabled$ | async" [value]="position$ | async" [max]="(currentSong | async).duration" (change)="seek($event)"></mat-slider>
       <span>{{(currentSong | async).formattedDuration}}</span>
     </div>
   </div>

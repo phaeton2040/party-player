@@ -13,6 +13,7 @@ export class MainComponent implements OnInit {
 
   currentSong: Observable<Song>;
   position$ = of(0);
+  disabled$: Observable<boolean>;
 
   constructor(private player: PlayerService) {
     this.currentSong = this.player.currentSong$;
@@ -21,11 +22,13 @@ export class MainComponent implements OnInit {
   ngOnInit(): void {
     this.player.isPlaying$.subscribe(playing => {
       if (!playing) {
-        this.position$ = of(0);
+        this.position$ = of(
+          0);
       } else {
         this.position$ = this.player.position$;
       }
     });
+    this.disabled$ = this.player.isSeeking;
   }
 
   public formatTime(position: number): string {

@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { BehaviorSubject, interval, Observable } from "rxjs";
+import { BehaviorSubject, interval, Observable, Subject } from "rxjs";
 import { ElectronService } from "../electron/electron.service";
 import { Song } from '../../../models/song.model';
 import { filter, map, switchMap, take } from 'rxjs/operators';
@@ -110,15 +110,15 @@ export class PlayerService {
       this.audio.start(this.context.currentTime, this.offset);
 
       this.audio.onended = () => {
-        if (this.isSeeking || this.isStop) {
+        if (this.isSeeking.value || this.isStop.value) {
           return;
         }
         this.stop();
         this.findSongAndPlay(this.playlist.getNextSong(this.playerIndex.value));
       };
 
-      this.isSeeking = false;
-      this.isStop = false;
+      this.isSeeking.next(false);
+      this.isStop.next(false);
     } catch (e) {
       console.log('Error while trying to play:', e);
     }
@@ -157,7 +157,7 @@ export class PlayerService {
     this.audio.playbackRate.setValueAtTime(1, this.context.currentTime);
   }
 
-  private isStop = false;
+  public isStop = new BehaviorSubject(false);
 
   public async stop(erase = true): Promise<void> {
     if (!this.audio) {
@@ -166,7 +166,7 @@ export class PlayerService {
 
     this.isPlaying.next(false);
     this.isPaused.next(false);
-    this.isStop = true;
+    this.isStop.next(true);
     this.audio.stop();
 
     if (erase) {
@@ -184,11 +184,11 @@ export class PlayerService {
     }
   }
 
-  private isSeeking = false;
+  public isSeeking = new BehaviorSubject(false);
 
   public async seek(position: number): Promise<void> {
     this.offset = position;
-    this.isSeeking = true;
+    this.isSeeking.next(true);
 
     await this.stop(false);
     await this.playSong(this.currentSong.value);

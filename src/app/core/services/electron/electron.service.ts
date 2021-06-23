@@ -8,8 +8,6 @@ import * as childProcess from 'child_process';
 import * as fs from 'fs';
 import { Song } from "../../../models/song.model";
 import { v4 as uuidv4 } from 'uuid';
-
-const mm = window.require('music-metadata');
 const nodePath = window.require('path');
 
 @Injectable({
@@ -22,8 +20,7 @@ export class ElectronService {
   dialog: typeof dialog;
   childProcess: typeof childProcess;
   fs: typeof fs;
-  play: any;
-  context: AudioContext;
+  mm: any; // music-metadata
 
   get isElectron(): boolean {
     return !!(window && window.process && window.process.type);
@@ -35,10 +32,10 @@ export class ElectronService {
       this.ipcRenderer = window.require('electron').ipcRenderer;
       this.webFrame = window.require('electron').webFrame;
       this.dialog = window.require('electron').dialog;
-      this.remote = window.require('@electron/remote');
+      this.remote = window.require('electron').remote;
       this.childProcess = window.require('child_process');
       this.fs = window.require('fs');
-      this.play = window.require('audio-play');
+      this.mm = this.remote.require('music-metadata');
     }
   }
 
@@ -53,10 +50,10 @@ export class ElectronService {
     }));
   }
 
-  public readFile(path): Promise<Song> {
+  public readFile(path: string): Promise<Song> {
     return Promise.all([
       Promise.resolve(nodePath.basename(path)),
-      mm.parseFile(path, { duration: true, skipCovers: false })
+      this.mm.parseFile(path, { duration: true, skipCovers: false })
     ]).then(([name, stat]) => {
       const songName = stat.common.title || name;
       const author = stat.common.artist || 'Unknown';
