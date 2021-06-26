@@ -16,7 +16,8 @@ export class HeaderComponent implements OnInit {
   isPlaying$: Observable<boolean>;
   volume = 0.5;
   disabled$: Observable<boolean>;
-  songsPerPlaylist = 2;
+  songsPerPlaylist = this.playlist.settings.sequential.songsPerPlaylist;
+  playStraight = this.playlist.settings.straight;
 
   constructor(private dialog: MatDialog,
               private player: PlayerService,
@@ -79,5 +80,9 @@ export class HeaderComponent implements OnInit {
 
   onSongsNumberChange(songsPerPlaylist: number): void {
     this.playlist.setSettings({ sequential: { songsPerPlaylist }});
+  }
+
+  onPlayStraightChange(straight: boolean): void {
+    this.playlist.setSettings({ straight });
   }
 }

@@ -6,6 +6,7 @@ import { PlayerIndex } from '../player/player.service';
 
 export interface PlaybackSettings {
   randomize?: boolean;
+  straight?: boolean;
   sequential?: {
     songsPerPlaylist: number
   }
@@ -16,8 +17,9 @@ export interface PlaybackSettings {
 })
 export class PlaylistService {
 
-  private settings: PlaybackSettings = {
+  public settings: PlaybackSettings = {
     randomize: false,
+    straight: true,
     sequential: {
       songsPerPlaylist: 2
     }
@@ -33,6 +35,7 @@ export class PlaylistService {
   }
 
   public setSettings(s: Partial<PlaybackSettings>): void {
+    this.resetHistory();
     this.settings = { ...this.settings, ...s };
   }
 
@@ -68,30 +71,30 @@ export class PlaylistService {
       this.history[playerIndex.playlistIndex] = [];
     }
 
-    // switch to the next playlist
-    if (this.currentSeq.length >= this.settings.sequential.songsPerPlaylist) {
-      playerIndex.playlistIndex = (playerIndex.playlistIndex + 1) < this.playlists.value.length ?
-        playerIndex.playlistIndex + 1 : 0;
+    if (!this.settings.straight) {
+      if (this.currentSeq.length >= this.settings.sequential.songsPerPlaylist) {
+        playerIndex.playlistIndex = (playerIndex.playlistIndex + 1) < this.playlists.value.length ?
+          playerIndex.playlistIndex + 1 : 0;
 
-      if (!this.history[playerIndex.playlistIndex]) {
-        this.history[playerIndex.playlistIndex] = [];
+        if (!this.history[playerIndex.playlistIndex]) {
+          this.history[playerIndex.playlistIndex] = [];
+        }
+
+        const currPlaylistHistory = this.history[playerIndex.playlistIndex];
+
+        playerIndex.songIndex = currPlaylistHistory[currPlaylistHistory.length - 1];
+        this.currentSeq = [];
       }
-
-      const currPlaylistHistory = this.history[playerIndex.playlistIndex];
-
-      // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-      playerIndex.songIndex = currPlaylistHistory[currPlaylistHistory.length - 1];
-      this.currentSeq = [];
     }
 
-    return this.switchNextSong(playerIndex);
+    return this.switchNextSong(playerIndex, this.settings.straight);
   }
 
   public getPrevSong(playerIndex: PlayerIndex): PlayerIndex {
     // reset history on moving back
     this.resetHistory();
 
-    const pl = this.playlists.value[playerIndex.playlistIndex];
+    let pl = this.playlists.value[playerIndex.playlistIndex];
     const { songIndex } = playerIndex;
 
     if (!pl) {
@@ -102,14 +105,15 @@ export class PlaylistService {
       return { ...playerIndex, songIndex: songIndex - 1 };
     } else {
       if (this.playlists.value[playerIndex.playlistIndex - 1]) {
-        return { playlistIndex: playerIndex.playlistIndex - 1, songIndex: 0 };
+        pl = this.playlists.value[playerIndex.playlistIndex - 1];
+        return { playlistIndex: playerIndex.playlistIndex - 1, songIndex: pl.songs.length - 1 };
       } else {
         return null;
       }
     }
   }
 
-  private switchNextSong(playerIndex: PlayerIndex): PlayerIndex {
+  private switchNextSong(playerIndex: PlayerIndex, switchPlaylistOnLastSong = false): PlayerIndex {
     const pl = this.playlists.value[playerIndex.playlistIndex];
     const { songIndex } = playerIndex;
 
@@ -128,21 +132,19 @@ export class PlaylistService {
       this.currentSeq.push(songIndex + 1);
       return { ...playerIndex, songIndex: songIndex + 1 };
     } else {
-      currPlaylistHistory.push(0);
-      this.currentSeq.push(0);
-      return { ...playerIndex, songIndex: 0 };
-    }
+      if (switchPlaylistOnLastSong) {
+        if (this.playlists.value[playerIndex.playlistIndex + 1]) {
+          return { playlistIndex: playerIndex.playlistIndex + 1, songIndex: 0 };
+        } else {
+          return null;
+        }
+      } else {
+        currPlaylistHistory.push(0);
+        this.currentSeq.push(0);
 
-    // algorithm for straight playback
-    // if (pl.songs[songIndex + 1]) {
-    //   return { ...playerIndex, songIndex: songIndex + 1 };
-    // } else {
-    //   if (this.playlists.value[playerIndex.playlistIndex + 1]) {
-    //     return { playlistIndex: playerIndex.playlistIndex + 1, songIndex: 0 };
-    //   } else {
-    //     return null;
-    //   }
-    // }
+        return { ...playerIndex, songIndex: 0 };
+      }
+    }
   }
 
   public resetHistory(): void {

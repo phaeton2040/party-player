@@ -23,8 +23,11 @@
   </div>
 
   <div class="settings">
+    <label for="play-straight" class="play-straight">Play straight</label>
+    <input type="checkbox" id="play-straight" [(ngModel)]="playStraight" (ngModelChange)="onPlayStraightChange($event)" />
     <label for="songs-per-pl" class="songs-per-pl-label">Songs per playlist:</label>
     <input type="number"
+           [disabled]="playStraight"
            [(ngModel)]="songsPerPlaylist"
            (ngModelChange)="onSongsNumberChange($event)"
            id="songs-per-pl" style="width: 50px"
