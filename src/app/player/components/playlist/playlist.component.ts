@@ -16,22 +16,36 @@ export class PlaylistComponent implements OnInit {
   @Input()
   public index: number;
 
+  public wrapped = false;
+  public active = false;
+
   constructor(private player: PlayerService,
               private playlistSrv: PlaylistService) { }
 
   ngOnInit(): void {
+    this.player.playerIndex$.subscribe(index => {
+      this.active = index.playlistIndex === this.index;
+      this.wrapped = !this.active;
+    });
   }
 
-  removePlaylist(name: string) {
+  removePlaylist(e, name: string) {
+    e.stopImmediatePropagation();
     // TODO: add confirmation dialog
     this.playlistSrv.removePlaylist(name);
   }
 
-  async addFiles() {
+  async addFiles(e) {
+    e.stopImmediatePropagation();
     await this.playlistSrv.addSongs(this.playlist.name);
   }
 
   playSong(songIndex: number) {
+    this.playlistSrv.initHistory(this.index);
     this.player.findSongAndPlay({ playlistIndex: this.index, songIndex });
+  }
+
+  toggle() {
+    this.wrapped = !this.wrapped;
   }
 }

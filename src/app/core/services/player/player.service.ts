@@ -54,6 +54,10 @@ export class PlayerService {
       );
   }
 
+  public get playerIndex$(): Observable<PlayerIndex> {
+    return this.playerIndex.asObservable();
+  }
+
   constructor(private electron: ElectronService,
               private playlist: PlaylistService) {
     this.context = new AudioContext();
@@ -125,21 +129,12 @@ export class PlayerService {
   }
 
   public playCurrentOrFirst(): void {
-    this.playlist.playlists$
-      .pipe(
-        take(1)
-      ).subscribe(playlists => {
-        if (this.currentSong.value) {
-          this.playSong(this.currentSong.value);
-        } else {
-          const pl = playlists[0];
-          const song = pl ? pl.songs[0] : null;
-
-          if (song) {
-            this.playSong(song);
-          }
-        }
-      });
+    if (this.currentSong.value) {
+      this.playSong(this.currentSong.value);
+    } else {
+      this.playlist.initHistory();
+      this.findSongAndPlay(this.playerIndex.value);
+    }
   }
 
   public async pauseSong(): Promise<void> {
@@ -159,7 +154,7 @@ export class PlayerService {
 
   public isStop = new BehaviorSubject(false);
 
-  public async stop(erase = true): Promise<void> {
+  public async stop(erase = true, resetHistory = false): Promise<void> {
     if (!this.audio) {
       return;
     }
@@ -173,6 +168,10 @@ export class PlayerService {
       this.startTime = this.context.currentTime;
       this.offset = 0;
       await this.context.suspend();
+    }
+
+    if (resetHistory) {
+      this.playlist.resetHistory();
     }
   }
 

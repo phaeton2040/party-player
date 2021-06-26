@@ -16,14 +16,12 @@ export class HeaderComponent implements OnInit {
   isPlaying$: Observable<boolean>;
   volume = 0.5;
   disabled$: Observable<boolean>;
+  songsPerPlaylist = 2;
 
   constructor(private dialog: MatDialog,
               private player: PlayerService,
               private playlist: PlaylistService) {
     this.isPlaying$ = this.player.isPlaying$;
-    this.isPlaying$.subscribe(val => {
-      console.log('is playing:', val);
-    });
     this.disabled$ = this.player.isStop;
   }
 
@@ -57,13 +55,14 @@ export class HeaderComponent implements OnInit {
         if (paused) {
           this.player.resumeSong();
         } else {
+          this.playlist.initHistory();
           this.player.playCurrentOrFirst();
         }
       });
   }
 
   stop(): void {
-    this.player.stop();
+    this.player.stop(true, true);
   }
 
   setVolume(e): void {
@@ -76,5 +75,9 @@ export class HeaderComponent implements OnInit {
 
   prev(): void {
     this.player.playPrev();
+  }
+
+  onSongsNumberChange(songsPerPlaylist: number): void {
+    this.playlist.setSettings({ sequential: { songsPerPlaylist }});
   }
 }

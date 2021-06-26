@@ -23,13 +23,20 @@
   </div>
 
   <div class="settings">
+    <label for="songs-per-pl" class="songs-per-pl-label">Songs per playlist:</label>
+    <input type="number"
+           [(ngModel)]="songsPerPlaylist"
+           (ngModelChange)="onSongsNumberChange($event)"
+           id="songs-per-pl" style="width: 50px"
+           min="1"
+           max="10" placeholder="Songs per playlist" />
     <button class="add-folder" mat-button color="primary" (click)="showAddPlayListDialog()">
       <mat-icon style="margin-top: -3px">add</mat-icon>
       Add playlist
     </button>
-    <button mat-icon-button>
-      <mat-icon>settings</mat-icon>
-    </button>
+<!--    <button mat-icon-button>-->
+<!--      <mat-icon>settings</mat-icon>-->
+<!--    </button>-->
   </div>
 
 </div>

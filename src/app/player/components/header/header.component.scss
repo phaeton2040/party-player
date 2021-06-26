@@ -21,6 +21,12 @@
     flex: 1;
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+
+    .songs-per-pl-label {
+      font-size: 12px;
+      margin-right: 10px;
+    }
   }
 
   .playback-controls {

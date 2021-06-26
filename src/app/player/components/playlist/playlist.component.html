@@ -1,16 +1,16 @@
 <div class="folder">
   <div class="name-and-controls">
-    <div class="folder-name">{{playlist.name}}</div>
+    <div class="folder-name" [class.active]="active" (click)="toggle()">{{playlist.name}} ({{playlist.songs.length}})</div>
     <div class="buttons">
-      <button class="playlist-buttons" mat-icon-button (click)="removePlaylist(playlist.name)">
+      <button class="playlist-buttons" mat-icon-button (click)="removePlaylist($event, playlist.name)">
         <mat-icon>remove</mat-icon>
       </button>
-      <button class="playlist-buttons" mat-icon-button (click)="addFiles()">
+      <button class="playlist-buttons" mat-icon-button (click)="addFiles($event)">
         <mat-icon>add</mat-icon>
       </button>
     </div>
   </div>
-  <div class="songs-list">
+  <div class="songs-list" [class.hidden]="wrapped">
     <rp-song (selectSong)="playSong(i)" [song]="song" *ngFor="let song of playlist.songs; let i = index"></rp-song>
   </div>
 </div>
