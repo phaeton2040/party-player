@@ -1,13 +1,11 @@
 import { Injectable } from '@angular/core';
-
-// If you import a module but never use any of the imported values other than as TypeScript types,
-// the resulting javascript file will look as if you never imported the module at all.
 import { ipcRenderer, webFrame, dialog } from 'electron';
 import * as remote from '@electron/remote';
 import * as childProcess from 'child_process';
 import * as fs from 'fs';
 import { Song } from "../../../models/song.model";
 import { v4 as uuidv4 } from 'uuid';
+
 const nodePath = window.require('path');
 
 @Injectable({
@@ -42,10 +40,14 @@ export class ElectronService {
   public async selectFiles(): Promise<Song[]> {
     const selection = await this.remote.dialog.showOpenDialog(
       this.remote.getCurrentWindow(),
-      {properties: ['openFile', 'multiSelections']}
+      { properties: [ 'openFile', 'multiSelections' ] }
     );
 
-    return await Promise.all(selection.filePaths.map(async path => {
+    return await this.generateSongsFromPaths(selection.filePaths);
+  }
+
+  public async generateSongsFromPaths(filePaths: string[]): Promise<Song[]> {
+    return await Promise.all(filePaths.map(async path => {
       return await this.readFile(path);
     }));
   }
@@ -54,7 +56,7 @@ export class ElectronService {
     return Promise.all([
       Promise.resolve(nodePath.basename(path)),
       this.mm.parseFile(path, { duration: true, skipCovers: false })
-    ]).then(([name, stat]) => {
+    ]).then(([ name, stat ]) => {
       const songName = stat.common.title || name;
       const author = stat.common.artist || 'Unknown';
 
@@ -68,7 +70,7 @@ export class ElectronService {
     });
   }
 
-  public read(path: string) {
+  public read(path: string): Promise<ArrayBuffer> {
     return new Promise((res, rej) => {
       this.fs.readFile(path, null, (err, file) => {
         if (err) {

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, HostListener, Input, OnInit } from '@angular/core';
 import { PlayerService } from "../../../core/services/player/player.service";
 import { Playlist } from "../../../models/playlist.interface";
 import { PlaylistService } from '../../../core/services/playlist/playlist.service';
@@ -18,6 +18,30 @@ export class PlaylistComponent implements OnInit {
 
   public wrapped = false;
   public active = false;
+  public highlightOnDrag = false;
+
+  @HostListener('dragover', ['$event'])
+  public onDragOver(e: any): void {
+    e.preventDefault();
+  }
+
+  @HostListener('dragenter', ['$event'])
+  public onDragEnter(e: any): void {
+    e.preventDefault();
+    this.highlightOnDrag = true;
+  }
+
+  @HostListener('dragleave', ['$event'])
+  public onDragLeave(e: any): void {
+    e.preventDefault();
+    this.highlightOnDrag = false;
+  }
+
+  @HostListener('drop', ['$event.dataTransfer.files'])
+  public onDrop(files: any[]): void {
+    this.playlistSrv.addSongs(this.playlist.name, Array.from(files).map(f => f.path));
+    this.highlightOnDrag = false;
+  }
 
   constructor(private player: PlayerService,
               private playlistSrv: PlaylistService) { }

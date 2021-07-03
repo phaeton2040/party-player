@@ -1,4 +1,4 @@
-<div class="folder">
+<div class="folder" [class.onDrag]="highlightOnDrag">
   <div class="name-and-controls">
     <div class="folder-name" [class.active]="active" (click)="toggle()">{{playlist.name}} ({{playlist.songs.length}})</div>
     <div class="buttons">

@@ -53,10 +53,21 @@ export class PlaylistService {
     this.playlists.next(currPlaylists.filter((pl) => pl.name !== name));
   }
 
-  public async addSongs(playlistName: string): Promise<void> {
+  public async addSongs(playlistName: string, filePaths?: string[]): Promise<void> {
     const currPlaylists = this.playlists.value;
     const playlist = currPlaylists.find((pl) => pl.name === playlistName);
-    const songs = await this.electron.selectFiles();
+    let songs;
+
+    try {
+      if (filePaths) {
+        songs = await this.electron.generateSongsFromPaths(filePaths);
+      } else {
+        songs = await this.electron.selectFiles();
+      }
+    } catch (err) {
+      console.log('Error while loading songs:', err);
+      return;
+    }
 
     playlist.songs = playlist.songs.concat(songs);
 

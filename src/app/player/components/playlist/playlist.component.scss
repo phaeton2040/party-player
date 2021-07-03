@@ -1,5 +1,14 @@
 @import "../../../../colors";
 
+:host {
+  display: block;
+}
+
+.folder {
+  &.onDrag {
+    border: 1px solid crimson;
+  }
+}
 
 .name-and-controls {
   display: flex;
