@@ -32,11 +32,26 @@ export class PlaylistService {
   }
 
   constructor(private electron: ElectronService) {
+    const storedSettings = localStorage.getItem('settings');
+
+    if (storedSettings) {
+      this.settings = JSON.parse(storedSettings);
+    } else {
+      // store default settings
+      localStorage.setItem('settings', JSON.stringify(this.settings));
+    }
+
+    const storedPlaylists = localStorage.getItem('playlists');
+
+    if (storedPlaylists) {
+      this.playlists.next(JSON.parse(storedPlaylists) as Playlist[]);
+    }
   }
 
   public setSettings(s: Partial<PlaybackSettings>): void {
     this.resetHistory();
     this.settings = { ...this.settings, ...s };
+    localStorage.setItem('settings', JSON.stringify(this.settings));
   }
 
   public addPlaylist(pl: Playlist): void {
@@ -44,13 +59,16 @@ export class PlaylistService {
 
     currPlaylists.push(pl);
 
+    localStorage.setItem('playlists', JSON.stringify(currPlaylists));
     this.playlists.next(currPlaylists);
   }
 
   public removePlaylist(name: string): void {
     const currPlaylists = this.playlists.value;
+    const newPLaylists = currPlaylists.filter((pl) => pl.name !== name)
 
-    this.playlists.next(currPlaylists.filter((pl) => pl.name !== name));
+    localStorage.setItem('playlists', JSON.stringify(newPLaylists));
+    this.playlists.next(newPLaylists);
   }
 
   public async addSongs(playlistName: string, filePaths?: string[]): Promise<void> {
@@ -71,6 +89,7 @@ export class PlaylistService {
 
     playlist.songs = playlist.songs.concat(songs);
 
+    localStorage.setItem('playlists', JSON.stringify(currPlaylists));
     this.playlists.next(currPlaylists);
   }
 
