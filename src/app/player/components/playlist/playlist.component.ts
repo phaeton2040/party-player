@@ -26,13 +26,13 @@ export class PlaylistComponent implements OnInit {
   }
 
   @HostListener('dragenter', ['$event'])
-  public onDragEnter(e: any): void {
+  public onDragEnter(e: DragEvent): void {
     e.preventDefault();
     this.highlightOnDrag = true;
   }
 
   @HostListener('dragleave', ['$event'])
-  public onDragLeave(e: any): void {
+  public onDragLeave(e: DragEvent): void {
     e.preventDefault();
     this.highlightOnDrag = false;
   }
@@ -53,23 +53,23 @@ export class PlaylistComponent implements OnInit {
     });
   }
 
-  removePlaylist(e, name: string) {
+  removePlaylist(e: Event, name: string): void {
     e.stopImmediatePropagation();
     // TODO: add confirmation dialog
     this.playlistSrv.removePlaylist(name);
   }
 
-  async addFiles(e) {
+  async addFiles(e: Event): Promise<void> {
     e.stopImmediatePropagation();
     await this.playlistSrv.addSongs(this.playlist.name);
   }
 
-  playSong(songIndex: number) {
+  playSong(songIndex: number): void {
     this.playlistSrv.initHistory(this.index);
     this.player.findSongAndPlay({ playlistIndex: this.index, songIndex });
   }
 
-  toggle() {
+  toggle(): void {
     this.wrapped = !this.wrapped;
   }
 }

@@ -5,6 +5,7 @@ import { PlayerService } from "../../../core/services/player/player.service";
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { PlaylistService } from '../../../core/services/playlist/playlist.service';
+import { MatSliderChange } from '@angular/material/slider';
 
 @Component({
   selector: 'rp-header',
@@ -29,7 +30,7 @@ export class HeaderComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  showAddPlayListDialog() {
+  showAddPlayListDialog(): void {
     const dialogRef = this.dialog.open(AddPlaylistDialogComponent, {
       width: '250px',
       data: {}
@@ -44,11 +45,11 @@ export class HeaderComponent implements OnInit {
     });
   }
 
-  pause() {
+  pause(): void {
     this.player.pauseSong();
   }
 
-  play() {
+  play(): void {
     this.player.isPaused$
       .pipe(
         take(1)
@@ -66,7 +67,7 @@ export class HeaderComponent implements OnInit {
     this.player.stop(true, true);
   }
 
-  setVolume(e): void {
+  setVolume(e: MatSliderChange): void {
     this.player.setVolume(e.value);
   }
 

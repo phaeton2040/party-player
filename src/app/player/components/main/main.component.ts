@@ -3,6 +3,7 @@ import { Observable, of, combineLatest } from 'rxjs';
 import { Song } from '../../../models/song.model';
 import { PlayerService } from '../../../core/services/player/player.service';
 import { map } from 'rxjs/operators';
+import { MatSliderChange } from '@angular/material/slider';
 
 @Component({
   selector: 'rp-main',
@@ -50,8 +51,7 @@ export class MainComponent implements OnInit {
   }
 
 
-  public seek(e): void {
-    console.log('Seek position:', e.value);
+  public seek(e: MatSliderChange): void {
     this.player.seek(e.value);
   }
 }
