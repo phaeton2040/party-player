@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { BehaviorSubject, interval, Observable, Subject } from "rxjs";
+import { BehaviorSubject, interval, Observable, pipe, Subject } from "rxjs";
 import { ElectronService } from "../electron/electron.service";
 import { Song } from '../../../models/song.model';
 import { filter, map, switchMap, take } from 'rxjs/operators';
@@ -62,6 +62,18 @@ export class PlayerService {
               private playlist: PlaylistService) {
     this.context = new AudioContext();
     this.context.suspend();
+
+    this.playlist.onRemoveSong$
+      .pipe(
+        filter((index: PlayerIndex) => index.playlistIndex === this.playerIndex.value.playlistIndex && index.songIndex < this.playerIndex.value.songIndex)
+      )
+      .subscribe(() => {
+        const curIndex = this.playerIndex.value;
+
+        curIndex.songIndex--;
+
+        this.playerIndex.next(curIndex);
+      });
   }
 
   public findSongAndPlay(playerIndex: PlayerIndex): void {
@@ -76,15 +88,15 @@ export class PlayerService {
       .pipe(
         take(1)
       ).subscribe((playlists) => {
-        const playlist = playlists[playerIndex.playlistIndex];
-        const song = playlist ? playlist.songs[playerIndex.songIndex] : null;
+      const playlist = playlists[playerIndex.playlistIndex];
+      const song = playlist ? playlist.songs[playerIndex.songIndex] : null;
 
-        if (!song) {
-          return;
-        }
+      if (!song) {
+        return;
+      }
 
-        this.playSong(song);
-      });
+      this.playSong(song);
+    });
   }
 
   public async playSong(song: Song): Promise<void> {

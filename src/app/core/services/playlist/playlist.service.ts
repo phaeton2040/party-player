@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { Playlist } from '../../../models/playlist.interface';
 import { ElectronService } from '../electron/electron.service';
 import { PlayerIndex } from '../player/player.service';
+import { Song } from "../../../models/song.model";
 
 export interface PlaybackSettings {
   randomize?: boolean;
@@ -11,6 +12,8 @@ export interface PlaybackSettings {
     songsPerPlaylist: number
   }
 }
+
+// TODO: persist playlist and settings to local storage with another service instead of calling local storage directly
 
 @Injectable({
   providedIn: 'root'
@@ -26,9 +29,14 @@ export class PlaylistService {
   };
 
   private playlists: BehaviorSubject<Playlist[]> = new BehaviorSubject<Playlist[]>([]);
+  private onRemoveSong: Subject<PlayerIndex> = new Subject<PlayerIndex>();
 
   public get playlists$(): Observable<Playlist[]> {
     return this.playlists.asObservable();
+  }
+
+  public get onRemoveSong$(): Observable<PlayerIndex> {
+    return this.onRemoveSong.asObservable();
   }
 
   constructor(private electron: ElectronService) {
@@ -41,10 +49,17 @@ export class PlaylistService {
       localStorage.setItem('settings', JSON.stringify(this.settings));
     }
 
-    const storedPlaylists = localStorage.getItem('playlists');
+    const storedPlaylistsJson = localStorage.getItem('playlists');
 
-    if (storedPlaylists) {
-      this.playlists.next(JSON.parse(storedPlaylists) as Playlist[]);
+    if (storedPlaylistsJson) {
+      const storedPlaylists = JSON.parse(storedPlaylistsJson);
+
+      this.playlists.next(
+        storedPlaylists.map((storedPlaylist: Playlist) => {
+          storedPlaylist.songs = storedPlaylist.songs.map(s => new Song(s));
+          return storedPlaylist;
+        })
+      );
     }
   }
 
@@ -65,7 +80,7 @@ export class PlaylistService {
 
   public removePlaylist(name: string): void {
     const currPlaylists = this.playlists.value;
-    const newPLaylists = currPlaylists.filter((pl) => pl.name !== name)
+    const newPLaylists = currPlaylists.filter((pl) => pl.name !== name);
 
     localStorage.setItem('playlists', JSON.stringify(newPLaylists));
     this.playlists.next(newPLaylists);
@@ -91,6 +106,25 @@ export class PlaylistService {
 
     localStorage.setItem('playlists', JSON.stringify(currPlaylists));
     this.playlists.next(currPlaylists);
+  }
+
+  removeSong(index: PlayerIndex): void {
+    const pls = this.playlists.value;
+    const pl = pls[index.playlistIndex];
+
+    pl.songs.splice(index.songIndex, 1);
+
+    localStorage.setItem('playlists', JSON.stringify(pls));
+    this.playlists.next(pls);
+    this.onRemoveSong.next(index);
+
+    // reduce index in playlist history by 1
+    const currPlaylistHistory = this.history[index.playlistIndex];
+
+    if (this.currentSeq[this.currentSeq.length - 1] > index.songIndex) {
+      currPlaylistHistory[currPlaylistHistory.length - 1]--;
+      this.currentSeq[this.currentSeq.length - 1]--;
+    }
   }
 
   public history = {};
@@ -182,9 +216,9 @@ export class PlaylistService {
     this.currentSeq = [];
   }
 
-  public initHistory(playlistIndex = 0): void {
+  public initHistory(plIndex: PlayerIndex = { playlistIndex: 0, songIndex: 0 }): void {
     this.resetHistory();
-    this.history[playlistIndex] = [0];
-    this.currentSeq = [0];
+    this.history[plIndex.playlistIndex] = [ plIndex.songIndex ];
+    this.currentSeq = [ plIndex.songIndex ];
   }
 }

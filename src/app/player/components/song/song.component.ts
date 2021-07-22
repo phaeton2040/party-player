@@ -16,8 +16,14 @@ export class SongComponent implements OnInit {
   @Input()
   public song: Song;
 
+  @Input()
+  public index: number;
+
   @Output()
   public selectSong = new EventEmitter();
+
+  @Output()
+  public removeSong = new EventEmitter();
 
   public isActive$: Observable<boolean>;
 
@@ -36,5 +42,10 @@ export class SongComponent implements OnInit {
 
   play() {
     this.selectSong.emit(this.song.id);
+  }
+
+  onRemoveSong(event: Event, index: number): void {
+    event.stopImmediatePropagation();
+    this.removeSong.emit(index);
   }
 }

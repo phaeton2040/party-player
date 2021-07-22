@@ -2,7 +2,10 @@
   <div class="author-and-name" title="{{song.author}} - {{song.name}}">
     <span class="song-author">{{song.author}}</span> - <span class="song-name">{{song.name}}</span>
   </div>
-  <div class="time">
-    {{song.formattedDuration}}
+  <div class="time-and-remove">
+    <button mat-icon-button class="remove-button" (click)="onRemoveSong($event, index)">
+      <mat-icon color="warn">remove</mat-icon>
+    </button>
+    <span class="duration">{{song.formattedDuration}}</span>
   </div>
 </div>
