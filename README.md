@@ -1,4 +1,4 @@
-# Music player with advanced randominizing settings
+# Music player with advanced playlist settings
 
 Install dependencies:
 

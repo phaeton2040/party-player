@@ -19,6 +19,7 @@ import { AddPlaylistDialogComponent } from './components/header/add-playlist-dia
 import { MatDialogModule } from "@angular/material/dialog";
 import { SongComponent } from './components/song/song.component';
 import { PlaylistComponent } from './components/playlist/playlist.component';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @NgModule({
   declarations: [
@@ -41,7 +42,8 @@ import { PlaylistComponent } from './components/playlist/playlist.component';
     MatFormFieldModule,
     MatInputModule,
     MatExpansionModule,
-    MatDialogModule
+    MatDialogModule,
+    DragDropModule
   ]
 })
 export class PlayerModule {

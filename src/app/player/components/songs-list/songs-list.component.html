@@ -8,7 +8,7 @@
 <!--  </mat-form-field>-->
 <!--</div>-->
 
-<div *ngIf="(playlists$ | async).length > 0" class="songs-container">
+<div *ngIf="(playlists$ | async).length > 0" cdkDropListGroup class="songs-container">
   <rp-playlist [playlist]="pl" [index]="i" *ngFor="let pl of playlists$ | async; let i = index;"></rp-playlist>
 </div>
 <div class="no-playlists" *ngIf="(playlists$ | async).length === 0">

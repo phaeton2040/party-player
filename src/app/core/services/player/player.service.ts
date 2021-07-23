@@ -1,14 +1,16 @@
 import { Injectable } from "@angular/core";
-import { BehaviorSubject, interval, Observable, pipe, Subject } from "rxjs";
+import { BehaviorSubject, interval, Observable } from "rxjs";
 import { ElectronService } from "../electron/electron.service";
 import { Song } from '../../../models/song.model';
-import { filter, map, switchMap, take } from 'rxjs/operators';
+import { filter, map, switchMap, take, withLatestFrom } from 'rxjs/operators';
 import { PlaylistService } from '../playlist/playlist.service';
 
 export interface PlayerIndex {
   playlistIndex: number;
   songIndex: number;
 }
+
+// TODO: move audio context to a separate service
 
 @Injectable({
   providedIn: 'root'
@@ -74,6 +76,18 @@ export class PlayerService {
 
         this.playerIndex.next(curIndex);
       });
+    this.playlist.onMoveSong$
+      .pipe(
+        withLatestFrom(this.playlist.playlists$)
+      )
+      .subscribe(([_, playlists]) => {
+        const playerIndex = this.playerIndex.value;
+        const currentSong = this.currentSong.value;
+        const pl = playlists[playerIndex.playlistIndex];
+
+        playerIndex.songIndex = pl.songs.findIndex((song: Song) => song.id === currentSong.id);
+        this.playerIndex.next(playerIndex);
+      });
   }
 
   public findSongAndPlay(playerIndex: PlayerIndex): void {
@@ -88,15 +102,15 @@ export class PlayerService {
       .pipe(
         take(1)
       ).subscribe((playlists) => {
-      const playlist = playlists[playerIndex.playlistIndex];
-      const song = playlist ? playlist.songs[playerIndex.songIndex] : null;
+        const playlist = playlists[playerIndex.playlistIndex];
+        const song = playlist ? playlist.songs[playerIndex.songIndex] : null;
 
-      if (!song) {
-        return;
-      }
+        if (!song) {
+          return;
+        }
 
-      this.playSong(song);
-    });
+        this.playSong(song);
+      });
   }
 
   public async playSong(song: Song): Promise<void> {
@@ -110,7 +124,7 @@ export class PlayerService {
       this.startTime = this.context.currentTime - this.offset;
 
       const songArrayBuffer = await this.electron.read(song.path);
-      const audioBuffer = await this.context.decodeAudioData(songArrayBuffer as ArrayBuffer);
+      const audioBuffer = await this.context.decodeAudioData(songArrayBuffer );
 
       const currSong = this.currentSong.value;
 

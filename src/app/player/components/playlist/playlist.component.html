@@ -10,7 +10,19 @@
       </button>
     </div>
   </div>
-  <div class="songs-list" [class.hidden]="wrapped">
-    <rp-song (selectSong)="playSong(i)" (removeSong)="removeSong($event)" [song]="song" [index]="i" *ngFor="let song of playlist.songs; let i = index"></rp-song>
+  <div class="songs-list"
+       cdkDropList
+       [class.hidden]="wrapped"
+       (cdkDropListDropped)="drop($event)"
+       [cdkDropListData]="playlist.songs">
+    <div class="drag-box" *ngFor="let song of playlist.songs; let i = index" cdkDrag>
+      <div class="drag-placeholder" *cdkDragPlaceholder></div>
+      <rp-song class="drag-song"
+               (selectSong)="playSong(i)"
+               (removeSong)="removeSong($event)"
+               [song]="song"
+               [index]="i"></rp-song>
+    </div>
+
   </div>
 </div>

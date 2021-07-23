@@ -4,6 +4,7 @@ import { Playlist } from '../../../models/playlist.interface';
 import { ElectronService } from '../electron/electron.service';
 import { PlayerIndex } from '../player/player.service';
 import { Song } from "../../../models/song.model";
+import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 
 export interface PlaybackSettings {
   randomize?: boolean;
@@ -14,6 +15,7 @@ export interface PlaybackSettings {
 }
 
 // TODO: persist playlist and settings to local storage with another service instead of calling local storage directly
+// TODO: move history to a separate service
 
 @Injectable({
   providedIn: 'root'
@@ -30,6 +32,7 @@ export class PlaylistService {
 
   private playlists: BehaviorSubject<Playlist[]> = new BehaviorSubject<Playlist[]>([]);
   private onRemoveSong: Subject<PlayerIndex> = new Subject<PlayerIndex>();
+  private onMoveSong: Subject<void> = new Subject<void>();
 
   public get playlists$(): Observable<Playlist[]> {
     return this.playlists.asObservable();
@@ -37,6 +40,10 @@ export class PlaylistService {
 
   public get onRemoveSong$(): Observable<PlayerIndex> {
     return this.onRemoveSong.asObservable();
+  }
+
+  public get onMoveSong$(): Observable<void> {
+    return this.onMoveSong.asObservable();
   }
 
   constructor(private electron: ElectronService) {
@@ -175,6 +182,57 @@ export class PlaylistService {
         return null;
       }
     }
+  }
+
+  public moveSongsInPlaylists(event: CdkDragDrop<any>, plIndex: number): void {
+    const currPlaylists = this.playlists.value;
+    let oldPlaylistIndex, newPlaylistIndex;
+
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      const pl = currPlaylists[plIndex];
+
+      pl.songs = event.container.data;
+      this.playlists.next(currPlaylists);
+      localStorage.setItem('playlists', JSON.stringify(currPlaylists));
+    } else {
+      transferArrayItem(event.previousContainer.data,
+                        event.container.data,
+                        event.previousIndex,
+                        event.currentIndex);
+
+      oldPlaylistIndex = this.getPlaylistIndexFromDropListId(event.previousContainer.id);
+      newPlaylistIndex = this.getPlaylistIndexFromDropListId(event.container.id);
+      const oldPlaylist = currPlaylists[oldPlaylistIndex];
+      const newPlaylist = currPlaylists[newPlaylistIndex];
+
+      oldPlaylist.songs = event.previousContainer.data;
+      newPlaylist.songs = event.container.data;
+
+      this.playlists.next(currPlaylists);
+      localStorage.setItem('playlists', JSON.stringify(currPlaylists));
+    }
+
+    // update playlist history
+    const oldPlaylistHistory = this.history[oldPlaylistIndex];
+
+    if (oldPlaylistHistory && oldPlaylistHistory[oldPlaylistHistory.length - 1] >= event.previousIndex) {
+      oldPlaylistHistory[oldPlaylistHistory.length - 1]--;
+    }
+
+    const newPlaylistHistory = this.history[newPlaylistIndex];
+
+    if (newPlaylistHistory && newPlaylistHistory[newPlaylistHistory.length - 1] >= event.currentIndex) {
+      newPlaylistHistory[newPlaylistHistory.length - 1]++;
+    }
+
+    this.onMoveSong.next();
+  }
+
+  private getPlaylistIndexFromDropListId(id: string): number {
+    const idParts = id.split('-');
+
+    return parseInt(idParts[idParts.length - 1]);
   }
 
   private switchNextSong(playerIndex: PlayerIndex, switchPlaylistOnLastSong = false): PlayerIndex {

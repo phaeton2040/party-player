@@ -3,11 +3,12 @@ import { PlayerIndex, PlayerService } from "../../../core/services/player/player
 import { Playlist } from "../../../models/playlist.interface";
 import { PlaylistService } from '../../../core/services/playlist/playlist.service';
 import { take } from "rxjs/operators";
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'rp-playlist',
   templateUrl: './playlist.component.html',
-  styleUrls: [ './playlist.component.scss' ]
+  styleUrls: ['./playlist.component.scss']
 })
 export class PlaylistComponent implements OnInit {
 
@@ -21,24 +22,24 @@ export class PlaylistComponent implements OnInit {
   public active = false;
   public highlightOnDrag = false;
 
-  @HostListener('dragover', [ '$event' ])
+  @HostListener('dragover', ['$event'])
   public onDragOver(e: any): void {
     e.preventDefault();
   }
 
-  @HostListener('dragenter', [ '$event' ])
+  @HostListener('dragenter', ['$event'])
   public onDragEnter(e: DragEvent): void {
     e.preventDefault();
     this.highlightOnDrag = true;
   }
 
-  @HostListener('dragleave', [ '$event' ])
+  @HostListener('dragleave', ['$event'])
   public onDragLeave(e: DragEvent): void {
     e.preventDefault();
     this.highlightOnDrag = false;
   }
 
-  @HostListener('drop', [ '$event.dataTransfer.files' ])
+  @HostListener('drop', ['$event.dataTransfer.files'])
   public onDrop(files: any[]): void {
     this.playlistSrv.addSongs(this.playlist.name, Array.from(files).map(f => f.path));
     this.highlightOnDrag = false;
@@ -70,8 +71,8 @@ export class PlaylistComponent implements OnInit {
   }
 
   playSong(songIndex: number): void {
-    this.playlistSrv.initHistory({ playlistIndex: this.index, songIndex });
-    this.player.findSongAndPlay({ playlistIndex: this.index, songIndex });
+    this.playlistSrv.initHistory({playlistIndex: this.index, songIndex});
+    this.player.findSongAndPlay({playlistIndex: this.index, songIndex});
   }
 
   toggle(): void {
@@ -86,7 +87,11 @@ export class PlaylistComponent implements OnInit {
         if (curIndex.playlistIndex === this.index && songIndex === curIndex.songIndex) {
           this.player.stop();
         }
-        this.playlistSrv.removeSong({ songIndex: songIndex, playlistIndex: this.index });
+        this.playlistSrv.removeSong({songIndex: songIndex, playlistIndex: this.index});
       });
+  }
+
+  drop(event: CdkDragDrop<any>): void {
+    this.playlistSrv.moveSongsInPlaylists(event, this.index);
   }
 }
