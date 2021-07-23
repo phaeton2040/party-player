@@ -40,7 +40,7 @@ export class SongComponent implements OnInit {
       );
   }
 
-  play() {
+  play(): void {
     this.selectSong.emit(this.song.id);
   }
 

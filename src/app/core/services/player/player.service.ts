@@ -80,7 +80,7 @@ export class PlayerService {
       .pipe(
         withLatestFrom(this.playlist.playlists$)
       )
-      .subscribe(([_, playlists]) => {
+      .subscribe(([, playlists]) => {
         const playerIndex = this.playerIndex.value;
         const currentSong = this.currentSong.value;
         const pl = playlists[playerIndex.playlistIndex];

@@ -23,7 +23,7 @@ export class PlaylistComponent implements OnInit {
   public highlightOnDrag = false;
 
   @HostListener('dragover', ['$event'])
-  public onDragOver(e: any): void {
+  public onDragOver(e: DragEvent): void {
     e.preventDefault();
   }
 
